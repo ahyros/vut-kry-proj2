@@ -4,15 +4,9 @@
 #include "argParser.h"
 
 
-#define DEBUG(X) std::cout << X << std::endl
-
-
-//ProgramInput parseArgs(int argc, char ** argv) {
-//    if(argc == 1) displayUsage(); // Invalid number of args... print usage
-//    if(!std::strcmp(argv[1], "-h")) displayUsage(); // For -h option show usage
-//    else return parsePrimary(argc, argv);
-//}
-
+/**
+ * @brief Prints usage to STDOUT
+ */
 void displayUsage() {
     std::cout << "Usage: proj2 [options]" << std::endl;
     std::cout << "Options:" << std::endl;
@@ -23,7 +17,8 @@ void displayUsage() {
     exit(0); // program end with this message
 }
 
-/*
+
+/* // TODO tento koment presunut ku parseSecondary()
  * Following 4 functions checks, if arguments for individual
  * primary options (-c, -s, -v, -e) are legal. First argument
  * count is checked, then if correct secondary options were
@@ -32,7 +27,16 @@ void displayUsage() {
  * start with symbol '-'). If illegal count/combination is
  * found, program ends with error.
  */
-
+/**
+ * @brief This function checks, if program's arguments are valid
+ * @details If no arguments were entered, or -h was entered as primary argument, usage is shown and program ends.
+ * If other valid primary option was entered (-c, -s, -v, -e), then corresponding secondary options are checked.
+ * Any invalid combination, count, or secondary option leads to error and program ends. If everything is correct,
+ * input from STDIN is read and returned.
+ * @param argc Count of command line argument
+ * @param argv Command line arguments
+ * @return TODO mozno sa bude citanie vstupu presuvat inam
+ */
 ProgramInput parsePrimary(int argc, char ** argv) {
     std::string primaryOption(argv[1]);
 
@@ -88,14 +92,7 @@ char* readInput() {
     std::string userInput;
     std::getline(std::cin, userInput); // read user input until `\n` is encountered
     auto byteStream = (char*)malloc(userInput.size() * sizeof(char));
+    if(byteStream == nullptr) throwError("[ERROR] Memory allocation failed...", ERR_MEM_ALLOCATION_FAILED);
     strcpy(byteStream, userInput.c_str()); // copy it to heap
     return byteStream;
-}
-
-
-
-
-void throwError(const std::string& errorMsg, int errorCode) {
-    std::cerr << errorMsg << std::endl;
-    exit(errorCode);
 }

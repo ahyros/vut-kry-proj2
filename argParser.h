@@ -10,16 +10,8 @@
 #include <iostream>
 #include <vector>
 
-// error 1 = nespravny pocet argument
-// error 2 = prepinace a ich argumenty nie su v spravnom poradi
-// error 3 = chybajuci option
-// error 4 = ziadny spravny základny (prvy) option
 
-#define ERR_INVALID_ARG_CNT 1
-#define ERR_INCORECT_OPT_ARG_ORDER 2
-#define ERR_MISSING_OPTION 3
-#define ERR_INVALID_PRIMARY_OPTION 4
-
+#include "error.h"
 
 typedef unsigned char byte;
 
@@ -51,10 +43,7 @@ static std::unordered_map<std::string, std::vector<std::string>> optConfigs = {
 void displayUsage();
 ProgramInput parsePrimary(int argc, char ** argv);
 //ProgramInput parseArgs(int argc, char ** argv);
-
-void throwError(const std::string& errorMsg, int errorCode);
 std::unordered_map<std::string, std::string> parseSecondary(char ** rest);
-
 char* readInput();
 
 
