@@ -7,17 +7,29 @@
 
 
 #include "argParser.h"
+#include "sha256.h"
+
 
 
 int main(int argc, char ** argv) {
     auto programInput = parsePrimary(argc, argv);
     std::cout << "ALL OK" << std::endl;
     std::cout << "Selected option: " << programInput.primaryOption << std::endl;
-    std::cout << "Bytestream len: " << strlen(programInput.byteStream) << std::endl;
+    std::cout << "Bytestream len: " << programInput.streamSize << std::endl;
     std::cout << "Bytestream: " << programInput.byteStream << std::endl;
-    free(programInput.byteStream);
-    return 0;
+    if(programInput.primaryOption == "-c") {
+        Message* msg = new Message(programInput.byteStream, programInput.streamSize, programInput.streamSize * 8);
+        sha256(msg);
+    }
 
+
+    return 0;
 }
 
 
+
+
+
+void calculateSHA256() {
+
+}

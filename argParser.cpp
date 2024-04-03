@@ -39,7 +39,6 @@ void displayUsage() {
  */
 ProgramInput parsePrimary(int argc, char ** argv) {
     std::string primaryOption(argv[1]);
-
     if(argc == 1) displayUsage(); // Invalid number of args... show usage
     if(primaryOption == "-h") displayUsage(); // For -h option show usage
 
@@ -63,7 +62,8 @@ ProgramInput parsePrimary(int argc, char ** argv) {
     }
 
     // If everything is valid, load input and return it along with parsed program options
-    return ProgramInput(argv[1], optArgs, readInput());
+    auto input = readInput();
+    return ProgramInput(primaryOption, optArgs, input.first, input.second);
 }
 
 
@@ -84,15 +84,19 @@ std::unordered_map<std::string, std::string> parseSecondary(char ** rest) {
 }
 
 
-/**
+/** TODO move comments to .h
  * @brief Read one line (= until `\n` character) from STDIN and stores it on the heap
  * @return Pointer to the inputted bytestream on the heap
  */
-char* readInput() {
+std::pair<byte*, size_t> readInput() {
     std::string userInput;
     std::getline(std::cin, userInput); // read user input until `\n` is encountered
-    auto byteStream = (char*)malloc(userInput.size() * sizeof(char));
+    int size = userInput.size();
+
+    auto byteStream = (byte*)malloc(size * sizeof(byte));
+
     if(byteStream == nullptr) throwError("[ERROR] Memory allocation failed...", ERR_MEM_ALLOCATION_FAILED);
-    strcpy(byteStream, userInput.c_str()); // copy it to heap
-    return byteStream;
+    memcpy(byteStream, (byte*)userInput.c_str(), size); // copy it to heap
+
+    return {byteStream, size};
 }

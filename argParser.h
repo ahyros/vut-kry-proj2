@@ -9,24 +9,27 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <utility>
 
 
 #include "error.h"
-
-typedef unsigned char byte;
+#include "utils.h"
 
 
 struct ProgramInput {
     std::string primaryOption;
     std::unordered_map<std::string, std::string> secondaryOptions;
-    char* byteStream;
+    byte* byteStream;
+    size_t streamSize;
 
     ProgramInput(std::string primaryOption,
             std::unordered_map<std::string, std::string> secondaryOptions,
-            char* byteStream) {
+            byte* byteStream,
+            size_t streamSize) {
         this->primaryOption = primaryOption;
         this->secondaryOptions = secondaryOptions;
         this->byteStream = byteStream;
+        this->streamSize = streamSize;
     }
 };
 
@@ -44,7 +47,7 @@ void displayUsage();
 ProgramInput parsePrimary(int argc, char ** argv);
 //ProgramInput parseArgs(int argc, char ** argv);
 std::unordered_map<std::string, std::string> parseSecondary(char ** rest);
-char* readInput();
+std::pair<byte*, size_t> readInput();
 
 
 #endif //PROJ2_ARGPARSER_H

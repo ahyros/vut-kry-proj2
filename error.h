@@ -18,8 +18,7 @@
 #define ERR_INVALID_PRIMARY_OPTION 4
 
 #define ERR_MEM_ALLOCATION_FAILED 10
-
-#define DEBUG(X) std::cout << X << std::endl
+#define ERR_ENDIANNESS_NOT_DEFINED 11
 
 
 void throwError(const std::string& errorMsg, int errorCode);
