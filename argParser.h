@@ -49,14 +49,11 @@ static std::unordered_map<std::string, std::vector<std::string>> optConfigs = {
 
 
 void displayUsage();
-ProgramInput parseOptX(int argc, char ** argv);
-ProgramInput parseArgs(int argc, char ** argv);
-ProgramInput parseOptC(int argc, char ** argv);
-ProgramInput parseOptS(int argc, char ** argv);
-ProgramInput parseOptV(int argc, char ** argv);
-ProgramInput parseOptE(int argc, char ** argv);
+ProgramInput parsePrimary(int argc, char ** argv);
+//ProgramInput parseArgs(int argc, char ** argv);
+
 void throwError(const std::string& errorMsg, int errorCode);
-std::unordered_map<std::string, std::string> parseRest(char ** rest);
+std::unordered_map<std::string, std::string> parseSecondary(char ** rest);
 
 char* readInput();
 

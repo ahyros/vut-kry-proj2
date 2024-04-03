@@ -7,22 +7,11 @@
 #define DEBUG(X) std::cout << X << std::endl
 
 
-ProgramInput parseArgs(int argc, char ** argv) {
-    if(argc == 1) displayUsage(); // Invalid number of args... print usage
-
-    if(!std::strcmp(argv[1], "-h")) displayUsage();
-    else return parseOptX(argc, argv);
-
-
-    // check individual primary options
-    if(!std::strcmp(argv[1], "-c")) return parseOptC(argc, argv);
-    else if(!std::strcmp(argv[1], "-s")) return parseOptS(argc, argv);
-    else if(!std::strcmp(argv[1], "-v")) return parseOptV(argc, argv);
-    else if(!std::strcmp(argv[1], "-e")) return parseOptE(argc, argv);
-    else if(!std::strcmp(argv[1], "-h")) displayUsage();
-    // no primary option found, throwing error
-    else throwError("[ERROR] Invalid option. Use -h to see usage", ERR_INVALID_PRIMARY_OPTION);
-}
+//ProgramInput parseArgs(int argc, char ** argv) {
+//    if(argc == 1) displayUsage(); // Invalid number of args... print usage
+//    if(!std::strcmp(argv[1], "-h")) displayUsage(); // For -h option show usage
+//    else return parsePrimary(argc, argv);
+//}
 
 void displayUsage() {
     std::cout << "Usage: proj2 [options]" << std::endl;
@@ -44,23 +33,28 @@ void displayUsage() {
  * found, program ends with error.
  */
 
-ProgramInput parseOptX(int argc, char ** argv) {
+ProgramInput parsePrimary(int argc, char ** argv) {
     std::string primaryOption(argv[1]);
 
+    if(argc == 1) displayUsage(); // Invalid number of args... show usage
+    if(primaryOption == "-h") displayUsage(); // For -h option show usage
+
+    // Throw error if no valid primary option is found
     if(!optConfigs.contains(primaryOption)) throwError("[ERROR] Invalid option. Use -h to see usage", ERR_INVALID_PRIMARY_OPTION);
-    auto secondaryOptions = optConfigs[primaryOption];
-    int secondaryCount = secondaryOptions.size();
+
+    // get required secondary options (for found primary option) from options configurations map
+    std::vector<std::string> secondaryOptions = optConfigs[primaryOption];
 
     // Multiply count of secondary options by two because theyre arguments also must be considered
     // Add 2 to account for program name and primary option
-    if(argc != 2 + (secondaryCount*2)) { // check if argument count is correct
+    if(argc != 2 + (secondaryOptions.size() * 2)) { // check if argument count is correct
         throwError("[ERROR] Illegal argument count with switch " + primaryOption + "...", ERR_INVALID_ARG_CNT);
     }
 
     // Parse secondary options along with theyre arguments
     // First two arguments are not considered secondary, therefore we skip them by doing +=2
-    std::unordered_map<std::string, std::string> optArgs = parseRest(argv += 2);
-    for(auto snd : secondaryOptions) {
+    std::unordered_map<std::string, std::string> optArgs = parseSecondary(argv += 2);
+    for(auto snd : secondaryOptions) { // iterate over secondary options and check if they are present in program's options
         if(!optArgs.contains(snd)) throwError("[ERROR] Missing option " + snd + "...", ERR_MISSING_OPTION);
     }
 
@@ -69,52 +63,7 @@ ProgramInput parseOptX(int argc, char ** argv) {
 }
 
 
-ProgramInput parseOptC(int argc, char ** argv) {
-    if(argc > 2) {
-        throwError("[ERROR] Illegal argument count with switch -c", ERR_INVALID_ARG_CNT);
-    }
-    // If everything is valid, load input and return it along with parsed program options
-    return ProgramInput(argv[1], {}, readInput());
-}
-
-ProgramInput parseOptS(int argc, char ** argv) {
-    if(argc != 4) {
-        throwError("[ERROR] Illegal argument count with switch -s", ERR_INVALID_ARG_CNT);
-    }
-    std::unordered_map<std::string, std::string> optArgs = parseRest(argv += 2);
-    if(!optArgs.contains("-k")) throwError("[ERROR] Missing option -k", ERR_MISSING_OPTION);
-
-    // If everything is valid, load input and return it along with parsed program options
-    return ProgramInput(argv[1], {}, readInput());
-}
-
-ProgramInput parseOptV(int argc, char ** argv) {
-    if(argc != 6) {
-        throwError("[ERROR] Illegal argument count with switch -v", ERR_INVALID_ARG_CNT);
-    }
-    std::unordered_map<std::string, std::string> optArgs = parseRest(argv += 2);
-    if(!optArgs.contains("-k")) throwError("[ERROR] Missing option -k", ERR_MISSING_OPTION);
-    if(!optArgs.contains("-m")) throwError("[ERROR] Missing option -m", ERR_MISSING_OPTION);
-
-    // If everything is valid, load input and return it along with parsed program options
-    return ProgramInput(argv[1], {}, readInput());
-}
-
-ProgramInput parseOptE(int argc, char ** argv) {
-    if(argc != 8) {
-        throwError("[ERROR] Illegal argument count with switch -e", ERR_INVALID_ARG_CNT);
-    }
-    std::unordered_map<std::string, std::string> optArgs = parseRest(argv += 2);
-    if(!optArgs.contains("-m")) throwError("[ERROR] Missing option -m", ERR_MISSING_OPTION);
-    if(!optArgs.contains("-a")) throwError("[ERROR] Missing option -a", ERR_MISSING_OPTION);
-    if(!optArgs.contains("-n")) throwError("[ERROR] Missing option -n", ERR_MISSING_OPTION);
-
-    // If everything is valid, load input and return it along with parsed program options
-    return ProgramInput(argv[1], {}, readInput());
-}
-
-
-std::unordered_map<std::string, std::string> parseRest(char ** rest) {
+std::unordered_map<std::string, std::string> parseSecondary(char ** rest) {
     std::unordered_map<std::string, std::string> optArgs;
     while(*rest != nullptr) { // iterate over array
         // check that option and arguments are in correct  order (first option, then its argument)

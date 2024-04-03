@@ -10,7 +10,7 @@
 
 
 int main(int argc, char ** argv) {
-    auto programInput = parseArgs(argc, argv);
+    auto programInput = parsePrimary(argc, argv);
     std::cout << "ALL OK" << std::endl;
     std::cout << "Selected option: " << programInput.primaryOption << std::endl;
     std::cout << "Bytestream len: " << strlen(programInput.byteStream) << std::endl;
