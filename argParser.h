@@ -45,9 +45,8 @@ static std::unordered_map<std::string, std::vector<std::string>> optConfigs = {
 
 void displayUsage();
 ProgramInput parsePrimary(int argc, char ** argv);
-//ProgramInput parseArgs(int argc, char ** argv);
 std::unordered_map<std::string, std::string> parseSecondary(char ** rest);
 std::pair<byte*, size_t> readInput();
-
+std::pair<byte*, size_t> readInputForS(std::string key);
 
 #endif //PROJ2_ARGPARSER_H

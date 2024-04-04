@@ -1,25 +1,26 @@
-//
-// Created by Andrej Hyros on 03/04/2024.
-//
+/**
+ * @file sha256.cpp
+ * @author Andrej Hýroš
+ * @date 03/04/2024
+ * @brief This file implements SHA256 hashing algorithm.
+ */
 
 #include "sha256.h"
 
-
-void sha256(Message *msg) {
+// TODO remove prints
+void sha256(Message* msg, uint32* result) {
+    // preprocessing
     paddMessage(msg);
     auto blocks = parseMessage(msg);
-    printByteStreamBinary(msg->byteStream, msg->sizeBytes);
-    calculateHash(msg, blocks);
-}
 
-void calculateHash(Message* msg, std::vector<byte*> blocks) {
+    // hash calculation
     size_t N = msg->sizeBits / BLOCK_SIZE;
     uint32 a,b,c,d,e,f,g,h;
-    uint32 T1 = 0, T2 = 0, tmp = 0;
+    uint32 T1, T2;
     uint32 W[64];
     memset(W, 0, 64*sizeof(uint32));
-    DEBUG(blocks.size());
-    uint32 H[8] = {
+
+    uint32 H[8] = { // initialize hash values
             0x6a09e667,
             0xbb67ae85,
             0x3c6ef372,
@@ -30,16 +31,7 @@ void calculateHash(Message* msg, std::vector<byte*> blocks) {
             0x5be0cd19,
     };
 
-    uint32* test;
-    memset(test, 0, 4);
-    //memcpy(reinterpret_cast<void*>(test), blocks.at(0) + 0 * sizeof(uint32), sizeof(uint32));
-    *test = copyRespectEndianness(blocks.at(0));
-    DEBUG("TUT:");
-    DEBUG(std::bitset<32>(*test));
-    DEBUG((uint64_t)(blocks.at(0)));
-    DEBUG((uint64_t)(msg->byteStream));
-
-
+    // hash calculation. Implemented according to specification FIPS PUB 180-4 (https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf)
     for(int i = 1; i <= N; i++) {
         // prepare message schedule
         for(int t=0; t < 64; t++) {
@@ -48,7 +40,7 @@ void calculateHash(Message* msg, std::vector<byte*> blocks) {
             else
                 W[t] = sigma1(W[t-2]) + W[t-7] + sigma0(W[t-15]) + W[t-16];
 
-            std::cout << "W[" << t << "]= " << std::bitset<32>(W[t]) << std::endl;
+            //std::cout << "W[" << t << "]= " << std::bitset<32>(W[t]) << std::endl;
         }
 
         a = H[0];
@@ -73,11 +65,8 @@ void calculateHash(Message* msg, std::vector<byte*> blocks) {
             b = a;
             a = T1 + T2;
 
-//            std::cout << "T1[" << t << "]= " << std::hex << T1 << std::endl;
-//            std::cout << "T2[" << t << "]= " << std::hex << T2 << std::endl << std::endl;
-
-            std::cout << "T1[" << t << "]= " << std::bitset<32>(T1) << std::endl;
-            std::cout << "T2[" << t << "]= " << std::bitset<32>(T2) << std::endl << std::endl;
+            //std::cout << "T1[" << t << "]= " << std::bitset<32>(T1) << std::endl;
+            //std::cout << "T2[" << t << "]= " << std::bitset<32>(T2) << std::endl << std::endl;
         }
 
         H[0] = a + H[0];
@@ -90,17 +79,14 @@ void calculateHash(Message* msg, std::vector<byte*> blocks) {
         H[7] = h + H[7];
 
     }
-    std::bitset<32> bits;
+
+    // store values to result pointer
     for(int i = 0; i < 8; i++) {
-        bits = H[i];
-        //std::cout << bits << " ";
         std::cout << std::hex << H[i];
+        result[i] = H[i];
     }
     std::cout << "\n\n";
 }
-
-
-
 
 
 void paddMessage(Message* msg) {
@@ -144,6 +130,11 @@ std::vector<byte*> parseMessage(Message* msg) {
 
 
 
+/*
+ * Bellow are helper functions used in hash calculation.
+ * Implemented according to specification FIPS PUB 180-4
+ * (https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf)
+ */
 
 uint32 Ch(uint32 x, uint32 y, uint32 z) {
     return (x & y) ^ (~x & z);
@@ -175,10 +166,6 @@ uint32 sigma0(uint32 x) {
 
 uint32 sigma1(uint32 x) {
     return rotr(x, 17) ^ rotr(x, 19) ^ (x >> 10);
-}
-
-uint32 add(uint32 x, uint32 y) {
-    return (x + y) % UINT32_MAX;
 }
 
 

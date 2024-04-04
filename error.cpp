@@ -1,6 +1,9 @@
-//
-// Created by Andrej Hyros on 03/04/2024.
-//
+/**
+ * @file error.cpp
+ * @author Andrej Hýroš
+ * @date 03/04/2024
+ * @brief This file implements error messages.
+ */
 
 #include "error.h"
 

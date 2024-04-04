@@ -1,6 +1,8 @@
-//
-// Created by Andrej Hyros on 03/04/2024.
-//
+/**
+ * @file sha256.h
+ * @author Andrej Hýroš
+ * @date 03/04/2024
+ */
 
 #ifndef PROJ2_SHA256_H
 #define PROJ2_SHA256_H
@@ -15,11 +17,20 @@
 #define WORD_SIZE 32
 #define BLOCK_SIZE 512
 
+/**
+ * @brief Struct encapsulation message and it's size for easier manupulation
+ */
 struct Message {
     byte* byteStream;
     size_t sizeBytes;
     size_t sizeBits;
 
+    /**
+     * @brief Default constuctor
+     * @param byteStream Pointer to byte buffer (input from STDIN)
+     * @param sizeBytes Size of buffer in bytes
+     * @param sizeBits Size of buffer in bits
+     */
     Message(byte* byteStream,
             size_t sizeBytes,
             size_t sizeBits) {
@@ -29,6 +40,10 @@ struct Message {
     }
 };
 
+/**
+ * @brief Hardcoded constants used in hash calculation.
+ * @note Specified by FIPS PUB 180-4 specification (https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf)
+ */
 static const uint32 K[64] = {
         0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
         0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
@@ -41,11 +56,28 @@ static const uint32 K[64] = {
 };
 
 
-
+/**
+ * @brief Padds the message as described in FIPS PUB 180-4.
+ * @param msg Message struct.
+ */
 void paddMessage(Message* msg);
-void sha256(Message* msg);
+
+/**
+ * SHA256 hash calculation as described in FIPS PUB 180-4.
+ * @param msg Message to be digested.
+ * @param result Output buffer for hash values.
+ */
+void sha256(Message* msg, uint32* result);
+
+/**
+ * Calculates pointers to individual 512bit blocks of the message.
+ * @param msg Message
+ * @return Vector of pointers to individual message byte buffer blocks.
+ */
 std::vector<byte*> parseMessage(Message* msg);
-void calculateHash(Message* msg, std::vector<byte*> blocks);
+
+
+// Helper functions implemented according to FIPS PUB 180-4
 
 uint32 Ch(uint32 x, uint32 y, uint32 z);
 uint32 Maj(uint32 x, uint32 y, uint32 z);
@@ -55,7 +87,6 @@ uint32 sum0(uint32 x);
 uint32 sum1(uint32 x);
 uint32 sigma0(uint32 x);
 uint32 sigma1(uint32 x);
-uint32 add(uint32 x, uint32 y);
 
 
 

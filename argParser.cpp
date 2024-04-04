@@ -61,6 +61,14 @@ ProgramInput parsePrimary(int argc, char ** argv) {
         if(!optArgs.contains(snd)) throwError("[ERROR] Missing option " + snd + "...", ERR_MISSING_OPTION);
     }
 
+    // For optimization purposses, some logic that would ideally be in other parts of the code is put here
+    if(primaryOption == "-s" || primaryOption == "-v") {
+        // For -s and -v option, I want to avoid first loading user input and then prepending key,
+        // because then I would have to allocate additional memory for new message, which is not ideal.
+        auto input = readInputForS(optArgs["-k"]);
+        return ProgramInput(primaryOption, optArgs, input.first, input.second);
+    }
+
     // If everything is valid, load input and return it along with parsed program options
     auto input = readInput();
     return ProgramInput(primaryOption, optArgs, input.first, input.second);
@@ -99,4 +107,17 @@ std::pair<byte*, size_t> readInput() {
     memcpy(byteStream, (byte*)userInput.c_str(), size); // copy it to heap
 
     return {byteStream, size};
+}
+
+std::pair<byte*, size_t> readInputForS(std::string key) {
+    std::string userInput;
+    std::getline(std::cin, userInput); // read user input until `\n` is encountered
+
+    auto byteStream = (byte*)malloc((userInput.size() + key.size()) * sizeof(byte));
+
+    if(byteStream == nullptr) throwError("[ERROR] Memory allocation failed...", ERR_MEM_ALLOCATION_FAILED);
+    memcpy(byteStream, (byte*)key.c_str(), key.size());
+    memcpy(byteStream + key.size(), (byte*)userInput.c_str(), userInput.size()); // copy it to heap
+
+    return {byteStream, userInput.size() + key.size()};
 }
