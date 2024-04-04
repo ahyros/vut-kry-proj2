@@ -18,17 +18,70 @@
 
 #define DEBUG(X) std::cout << X << std::endl
 #define HEX_PATTTERN "[0-9A-Fa-f]+"
+#define WORD_SIZE 32
+#define BLOCK_SIZE 512
+#define HASH_SIZE 8
 
 typedef uint32_t uint32;
 typedef unsigned char byte;
 
 
+/**
+ * @brief Finds closes larger multiple of certain number.
+ * @param x Closest multiple of number `multiple` to this number will be returned.
+ * @param multiple Multiple of this number will be returned.
+ * @return Closest multiple of number `multiple` to number `x`
+ */
 uint32 closestMultiple(uint32 x, uint32 multiple);
+
+/**
+ * @brief Sets individual bit to `1` in byte buffer.
+ * @param buffer Byte buffer
+ * @param bitIndex Specifies bit to be set. There are `size(buffer)*8` possible indices for any buffer.
+ */
 void setBitAt(byte *buffer, size_t bitIndex);
+
+/**
+ * @brief Sets individual bit to `0` in byte buffer.
+ * @param buffer Byte buffer
+ * @param bitIndex Specifies bit to be set. There are `size(buffer)*8` possible indices for any buffer.
+ */
 void clearBitAt(byte *buffer, size_t bitIndex);
+
+/**
+ * @brief Sets block of N bits to `1` in byte buffer.
+ * @param buffer Byte buffer
+ * @param bitIndex Specifies the first bit to be set.
+ * @param N Specifies, how many bits will be set.
+ */
 void setNBitsAt(byte *buffer, size_t bitIndex, size_t N);
+
+/**
+ * @brief Sets block of N bits to `0` in byte buffer.
+ * @param buffer Byte buffer
+ * @param bitIndex Specifies the first bit to be set.
+ * @param N Specifies, how many bits will be set.
+ */
 void clearNBitsAt(byte *buffer, size_t bitIndex, size_t N);
+
+/**
+ * @brief Prints byte stream to STDOUT in binary form. Used only for debugging.
+ * @param buffer Byte buffer.
+ * @param size Size of the buffer.
+ */
 void printByteStreamBinary(byte *buffer, size_t size);
+
+/**
+ * Prints out HASH as a continous string.
+ * @param H Array of 8 32bit unsigned integeres which contains the hash.
+ */
+void printHash(uint32* H);
+
+/**
+ * Retrieves single unsigned 32 bit integer from byte buffer with respect to endianness.
+ * @param src Pointer to byte buffer where 32bit integer is stored.
+ * @return Unsigned 32 bit integer.
+ */
 uint32 copyRespectEndianness(byte* src);
 
 /**

@@ -14,15 +14,16 @@
 // error 3 = chybajuci option
 // error 4 = ziadny spravny základny (prvy) option
 
-#define ERR_INVALID_ARG_CNT 1
-#define ERR_INCORECT_OPT_ARG_ORDER 2
-#define ERR_MISSING_OPTION 3
-#define ERR_INVALID_PRIMARY_OPTION 4
+// Errors related to program input
+#define ERR_INVALID_ARG_CNT 5
+#define ERR_INCORECT_OPT_ARG_ORDER 6
+#define ERR_MISSING_OPTION 7
+#define ERR_INVALID_PRIMARY_OPTION 8
+#define ERR_INVALID_HASH_ENTERED 9
 
-#define ERR_INVALID_HASH_ENTERED 5
-
-#define ERR_MEM_ALLOCATION_FAILED 10
-#define ERR_ENDIANNESS_NOT_DEFINED 11
+// Errors related to memory management
+#define ERR_MEM_ALLOCATION_FAILED 20
+#define ERR_ENDIANNESS_NOT_DEFINED 21
 
 
 /**

@@ -7,15 +7,7 @@
 
 #include "utils.h"
 
-// TODO add comments/documentation
 
-
-/**
- * @brief Finds closes larger multiple of certain number.
- * @param x Closest multiple of number `multiple` to this number will be returned.
- * @param multiple Multiple of this number will be returned.
- * @return Closest multiple of number `multiple` to number `x`
- */
 uint32 closestMultiple(uint32 x, uint32 multiple)
 {
     if (multiple == 0) return x;
@@ -26,32 +18,19 @@ uint32 closestMultiple(uint32 x, uint32 multiple)
     return x + multiple - remainder;
 }
 
-/**
- * @brief Sets individual bit to `1` in byte buffer.
- * @param buffer Byte buffer
- * @param bitIndex Specifies bit to be set. There are `size(buffer)*8` possible indices for any buffer.
- */
+
 void setBitAt(byte *buffer, size_t bitIndex) {
     auto byteIndex = bitIndex / 8;
     buffer[byteIndex] |= (0b10000000 >> (bitIndex % 8));
 }
 
-/**
- * @brief Sets individual bit to `0` in byte buffer.
- * @param buffer Byte buffer
- * @param bitIndex Specifies bit to be set. There are `size(buffer)*8` possible indices for any buffer.
- */
+
 void clearBitAt(byte *buffer, size_t bitIndex) {
     auto byteIndex = bitIndex / 8;
     buffer[byteIndex] &= ~(0b10000000 >> (bitIndex % 8));
 }
 
-/**
- * @brief Sets block of N bits to `1` in byte buffer.
- * @param buffer Byte buffer
- * @param bitIndex Specifies the first bit to be set.
- * @param N Specifies, how many bits will be set.
- */
+
 void setNBitsAt(byte *buffer, size_t bitIndex, size_t N) {
     auto byteIndex = bitIndex / 8;
     // index of the first bit of closest whole byte
@@ -74,12 +53,6 @@ void setNBitsAt(byte *buffer, size_t bitIndex, size_t N) {
     for(int i = bitIndex + N; i >  bitIndex + N - tailBitsSize; i--) setBitAt(buffer, i);
 }
 
-/**
- * @brief Sets block of N bits to `0` in byte buffer.
- * @param buffer Byte buffer
- * @param bitIndex Specifies the first bit to be set.
- * @param N Specifies, how many bits will be set.
- */
 void clearNBitsAt(byte *buffer, size_t bitIndex, size_t N) {
     auto byteIndex = bitIndex / 8;
     // index of the first bit of closest whole byte
@@ -102,11 +75,7 @@ void clearNBitsAt(byte *buffer, size_t bitIndex, size_t N) {
     for(int i = bitIndex + N; i >  bitIndex + N - tailBitsSize; i--) clearBitAt(buffer, i);
 }
 
-/**
- * @brief Prints byte stream to STDOUT in binary form. Used only for debugging.
- * @param buffer Byte buffer.
- * @param size Size of the buffer.
- */
+
 void printByteStreamBinary(byte *buffer, size_t size) {
     std::bitset<8> bits;
     int j = 1;
@@ -120,11 +89,6 @@ void printByteStreamBinary(byte *buffer, size_t size) {
     std::cout << "\n\n";
 }
 
-/**
- * Retrieves single unsigned 32 bit integer from byte buffer with respect to endianness.
- * @param src Pointer to byte buffer where 32bit integer is stored.
- * @return Unsigned 32 bit integer.
- */
 uint32 copyRespectEndianness(byte* src) {
     uint32 res = 0;
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -163,6 +127,13 @@ void stringHashToInt(std::string strHex, uint32* out) {
         //std::cout << "" << << std::endl;
         //std::cout << number << " ";
     }
+}
+
+void printHash(uint32 *H) {
+    for(int i = 0; i < HASH_SIZE; i++) {
+        std::cout << std::hex << H[i];
+    }
+    std::cout << "\n";
 }
 //
 // 4

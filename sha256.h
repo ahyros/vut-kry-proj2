@@ -14,9 +14,6 @@
 #include "utils.h"
 #include "error.h"
 
-#define WORD_SIZE 32
-#define BLOCK_SIZE 512
-
 /**
  * @brief Struct encapsulation message and it's size for easier manupulation
  */
@@ -39,6 +36,20 @@ struct Message {
         this->sizeBits = sizeBits;
     }
 };
+
+
+
+static const uint32 HInitial[HASH_SIZE] = {
+0x6a09e667,
+0xbb67ae85,
+0x3c6ef372,
+0xa54ff53a,
+0x510e527f,
+0x9b05688c,
+0x1f83d9ab,
+0x5be0cd19,
+};
+
 
 /**
  * @brief Hardcoded constants used in hash calculation.
@@ -66,8 +77,8 @@ void paddMessage(Message* msg);
  * SHA256 hash calculation as described in FIPS PUB 180-4.
  * @param msg Message to be digested.
  * @param result Output buffer for hash values.
- */
-void sha256(Message* msg, uint32* result);
+ */ //TODO update docstring to reflect added parameter
+void sha256(Message* msg, const uint32* H0, uint32* result);
 
 /**
  * Calculates pointers to individual 512bit blocks of the message.

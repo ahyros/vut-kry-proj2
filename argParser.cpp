@@ -1,41 +1,31 @@
-//
-// Created by Andrej Hyros on 01/04/2024.
-//
+/**
+ * @file argParser.cpp
+ * @author Andrej Hýroš
+ * @date 03/04/2024
+ * @brief This file contains logic for parsing and validating command line arguments.
+ */
 #include "argParser.h"
 
 
-/**
- * @brief Prints usage to STDOUT
- */
 void displayUsage() {
     std::cout << "Usage: proj2 [options]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << "  -c                                      Calculates checksum for message from STDIN" << std::endl;
     std::cout << "  -s [-k KEY]                             Calculates MAC for message from STDIN" << std::endl;
-    std::cout << "  -v [-k KEY] [-m CHS]                    Checks if... TODO" << std::endl;
+    std::cout << "  -v [-k KEY] [-m CHS]                    Checks if entered MAC matches to entered message and key" << std::endl;
     std::cout << "  -e [-k KEY] [-m CHS] [-n NUM] [-a MSG]  Does whatever... TODO" << std::endl;
-    exit(0); // program end with this message
+    exit(0); // program ends with this message
 }
 
 
-/* // TODO tento koment presunut ku parseSecondary()
- * Following 4 functions checks, if arguments for individual
+/*
+ * Following function checks, if arguments for individual
  * primary options (-c, -s, -v, -e) are legal. First argument
  * count is checked, then if correct secondary options were
  * entered in correct order (pairs `option argument`, where
  * option must start with symbol '-' and argument must not
  * start with symbol '-'). If illegal count/combination is
  * found, program ends with error.
- */
-/**
- * @brief This function checks, if program's arguments are valid
- * @details If no arguments were entered, or -h was entered as primary argument, usage is shown and program ends.
- * If other valid primary option was entered (-c, -s, -v, -e), then corresponding secondary options are checked.
- * Any invalid combination, count, or secondary option leads to error and program ends. If everything is correct,
- * input from STDIN is read and returned.
- * @param argc Count of command line argument
- * @param argv Command line arguments
- * @return TODO mozno sa bude citanie vstupu presuvat inam
  */
 ProgramInput parsePrimary(int argc, char ** argv) {
     std::string primaryOption(argv[1]);
@@ -83,31 +73,26 @@ std::unordered_map<std::string, std::string> parseSecondary(char ** rest) {
         if((*(rest+1))[0] == '-') throwError("[ERROR] Illegal argument combination", ERR_INCORECT_OPT_ARG_ORDER);
         optArgs.insert({*rest, *(rest+1)}); // insert option and its argument into map
         rest += 2;
-        /*
-         * It is worth noting, that if array's length is not even, segmentation fault will occur.
-         * Therefore this must be checked before calling this function.
-         */
+        /* It is worth noting, that if array's length is not even, segmentation fault will occur.
+         * Therefore this must be checked before calling this function. */
     }
     return optArgs;
 }
 
 
-/** TODO move comments to .h
- * @brief Read one line (= until `\n` character) from STDIN and stores it on the heap
- * @return Pointer to the inputted bytestream on the heap
- */
 std::pair<byte*, size_t> readInput() {
     std::string userInput;
     std::getline(std::cin, userInput); // read user input until `\n` is encountered
     int size = userInput.size();
 
     auto byteStream = (byte*)malloc(size * sizeof(byte));
-
     if(byteStream == nullptr) throwError("[ERROR] Memory allocation failed...", ERR_MEM_ALLOCATION_FAILED);
+
     memcpy(byteStream, (byte*)userInput.c_str(), size); // copy it to heap
 
     return {byteStream, size};
 }
+
 
 std::pair<byte*, size_t> readInputForS(std::string key) {
     std::string userInput;

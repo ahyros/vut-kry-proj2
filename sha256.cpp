@@ -7,29 +7,21 @@
 
 #include "sha256.h"
 
-// TODO remove prints
-void sha256(Message* msg, uint32* result) {
+void sha256(Message* msg, const uint32* H0, uint32* result) {
     // preprocessing
     paddMessage(msg);
     auto blocks = parseMessage(msg);
+
 
     // hash calculation
     size_t N = msg->sizeBits / BLOCK_SIZE;
     uint32 a,b,c,d,e,f,g,h;
     uint32 T1, T2;
-    uint32 W[64];
+    uint32 W[64], H[HASH_SIZE];
     memset(W, 0, 64*sizeof(uint32));
 
-    uint32 H[8] = { // initialize hash values
-            0x6a09e667,
-            0xbb67ae85,
-            0x3c6ef372,
-            0xa54ff53a,
-            0x510e527f,
-            0x9b05688c,
-            0x1f83d9ab,
-            0x5be0cd19,
-    };
+    memcpy(H, H0, HASH_SIZE * sizeof(uint32));
+
 
     // hash calculation. Implemented according to specification FIPS PUB 180-4 (https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf)
     for(int i = 1; i <= N; i++) {
@@ -39,8 +31,6 @@ void sha256(Message* msg, uint32* result) {
                 W[t] = copyRespectEndianness(blocks.at(i-1) + t * sizeof(uint32 ));
             else
                 W[t] = sigma1(W[t-2]) + W[t-7] + sigma0(W[t-15]) + W[t-16];
-
-            //std::cout << "W[" << t << "]= " << std::bitset<32>(W[t]) << std::endl;
         }
 
         a = H[0];
@@ -54,7 +44,6 @@ void sha256(Message* msg, uint32* result) {
 
         for(int t = 0; t <= 63; t++) {
             T1 = h + sum1(e) + Ch(e, f, g) + K[t] + W[t];
-
             T2 = sum0(a) + Maj(a, b, c);
             h = g;
             g = f;
@@ -64,9 +53,6 @@ void sha256(Message* msg, uint32* result) {
             c = b;
             b = a;
             a = T1 + T2;
-
-            //std::cout << "T1[" << t << "]= " << std::bitset<32>(T1) << std::endl;
-            //std::cout << "T2[" << t << "]= " << std::bitset<32>(T2) << std::endl << std::endl;
         }
 
         H[0] = a + H[0];
@@ -79,13 +65,10 @@ void sha256(Message* msg, uint32* result) {
         H[7] = h + H[7];
 
     }
-
     // store values to result pointer
     for(int i = 0; i < 8; i++) {
-        std::cout << std::hex << H[i];
         result[i] = H[i];
     }
-    std::cout << "\n\n";
 }
 
 

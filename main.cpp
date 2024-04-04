@@ -1,3 +1,11 @@
+/**
+ * @file main.cpp
+ * @author Andrej Hýroš
+ * @date 03/04/2024
+ * @brief This is the main source file of this project.
+ */
+
+
 #include <iostream>
 #include <string>
 #include <utility>
@@ -10,7 +18,6 @@
 #include "sha256.h"
 #include "utils.h"
 
-// TODO uvolnujem byte buffer po zratani sha256???
 
 int main(int argc, char ** argv) {
     auto programInput = parsePrimary(argc, argv);
@@ -20,46 +27,50 @@ int main(int argc, char ** argv) {
     std::cout << "Bytestream: " << programInput.byteStream << std::endl;
 
     if(programInput.primaryOption == "-c") {
-        Message* msg = new Message(programInput.byteStream, programInput.streamSize, programInput.streamSize * 8);
-        uint32 H[8];
-        sha256(msg, H);
-        free(msg); // TODO i probably dont even need this to be on the heap
+        Message msg = Message(programInput.byteStream, programInput.streamSize, programInput.streamSize * 8);
+        uint32 H[HASH_SIZE];
+        sha256(&msg, HInitial, H); // calculate hash
+
+        // print out hash
+        printHash(H);
+
+        // free buffer
+        free(msg.byteStream);
+        return 1;
     }
+
 
     if(programInput.primaryOption == "-s") {
-        Message* msg = new Message(programInput.byteStream, programInput.streamSize, programInput.streamSize * 8);
-        uint32 MAC[8];
-        sha256(msg, MAC);
-        free(msg);
-    }
-    if(programInput.primaryOption == "-v") {
-        Message* msg = new Message(programInput.byteStream, programInput.streamSize, programInput.streamSize * 8);
-        uint32 MAC[8];
-        uint32 enteredMAC[8];
-        sha256(msg, MAC);
-        stringHashToInt(programInput.secondaryOptions["-m"], enteredMAC);
+        Message msg = Message(programInput.byteStream, programInput.streamSize, programInput.streamSize * 8);
+        uint32 MAC[HASH_SIZE];
+        sha256(&msg, HInitial, MAC); // calculate MAC
 
-        for(int i = 0; i < 8; i++) {
-            std::cout << std::hex << MAC[i] << " " << std::hex << enteredMAC[i] << std::endl;
-        }
+        // print out result
+        printHash(MAC);
+
+        free(msg.byteStream);
+        return 1;
+    }
+
+
+    if(programInput.primaryOption == "-v") {
+        Message msg = Message(programInput.byteStream, programInput.streamSize, programInput.streamSize * 8);
+        uint32 MAC[HASH_SIZE]; // calculated MAC
+        uint32 enteredMAC[HASH_SIZE]; // MAC received from command line
+        sha256(&msg, HInitial, MAC);
+        stringHashToInt(programInput.secondaryOptions["-m"], enteredMAC);
+        free(msg.byteStream);
+
         bool ok = true;
-        for(int i = 0; i < 8; i++) {
+        for(int i = 0; i < HASH_SIZE; i++) {
             ok = ok && (MAC[i] == enteredMAC[i]);
         }
-        if(ok) DEBUG("MAC IS OK!");
-        else DEBUG("MAC IS NOT OK!");
-        DEBUG("\n");
-        free(msg);
+        if(ok) { DEBUG("OK"); return 0;} // TODO remove OK debug
+        else {DEBUG("NOT OK"); return 1;}
     }
 
 
-        return 0;
-}
+    if(programInput.primaryOption == "-e") {
 
-
-
-
-
-void calculateSHA256() {
-
+    }
 }
