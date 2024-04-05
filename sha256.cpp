@@ -7,12 +7,14 @@
 
 #include "sha256.h"
 
-void sha256(Message* msg, const uint32* H0, uint32* result) {
+void sha256(Message* msg, const uint32* H0, uint32* result, uint64_t len) {
     // preprocessing
-    paddMessage(msg);
+    DEBUG("TUT1");
+    //paddMessage(msg, len);
+    paddMessage2(msg);
     auto blocks = parseMessage(msg);
 
-
+    http://doorduino/unlock?nonce=42
     // hash calculation
     size_t N = msg->sizeBits / BLOCK_SIZE;
     uint32 a,b,c,d,e,f,g,h;
@@ -21,7 +23,6 @@ void sha256(Message* msg, const uint32* H0, uint32* result) {
     memset(W, 0, 64*sizeof(uint32));
 
     memcpy(H, H0, HASH_SIZE * sizeof(uint32));
-
 
     // hash calculation. Implemented according to specification FIPS PUB 180-4 (https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf)
     for(int i = 1; i <= N; i++) {
@@ -63,7 +64,7 @@ void sha256(Message* msg, const uint32* H0, uint32* result) {
         H[5] = f + H[5];
         H[6] = g + H[6];
         H[7] = h + H[7];
-
+        printHash(H);
     }
     // store values to result pointer
     for(int i = 0; i < 8; i++) {
@@ -72,17 +73,48 @@ void sha256(Message* msg, const uint32* H0, uint32* result) {
 }
 
 
-void paddMessage(Message* msg) {
+void paddMessage2(Message* msg) {
+    uint64_t paddedSizeBits = closestMultiple(msg->sizeBits + 65, BLOCK_SIZE);
+    uint64_t paddedSizeBytes = paddedSizeBits / 8;
+
+    byte* padded = (byte*)malloc(paddedSizeBits/8);
+    if(!padded) throwError("[ERROR] Memory allocation failed...", ERR_MEM_ALLOCATION_FAILED);
+    uint64_t msgSize64BigEndian = __builtin_bswap64(msg->sizeBits);
+
+    // set extended (padded) part of new message to zeros
+    memset(padded + msg->sizeBytes, 0x00, paddedSizeBytes - msg->sizeBytes);
+
+    // copy origanal message
+    memcpy(padded, msg->byteStream, msg->sizeBytes);
+
+    // set very first bit after original message to one
+    setBitAt(padded, msg->sizeBits);
+
+    // set last 64 bits of padded message to contain length of original message in bits (mind the endianness!)
+    memcpy(padded + paddedSizeBytes - 8, &msgSize64BigEndian, 8);
+
+    // Update data structure containing the message
+    free(msg->byteStream);
+    msg->byteStream = padded;
+    msg->sizeBits = paddedSizeBits;
+    msg->sizeBytes = paddedSizeBytes;
+}
+
+
+void paddMessage(Message* msg, uint64_t attackSize) {
     size_t paddedBitCount = closestMultiple(msg->sizeBits, BLOCK_SIZE);
     size_t totalByteCount = paddedBitCount / 8;
 
     byte* padded = (byte*)malloc(totalByteCount); // prepare larger buffer for padded message
     if(padded == nullptr) throwError("[ERROR] Memory allocation failed...", ERR_MEM_ALLOCATION_FAILED);
 
-    // calculate value `k` nad convert number expressing original message size to 64bit big endian
+    // calculate value `k`
     uint32 k = 448 - (msg->sizeBits + 1);
-    uint64_t msgSize64BigEndian = __builtin_bswap64 (msg->sizeBits);
+    uint64_t msgSize64BigEndian = 0;
 
+    // convert number expressing original message size to 64bit big endian. // todo doc for attack
+    if(!attackSize) msgSize64BigEndian = __builtin_bswap64(msg->sizeBits);
+    else msgSize64BigEndian = __builtin_bswap64(attackSize);
     // *** Actuall padding starts here ***
     // copy orignal message into prepared buffer for padded message
     memcpy(padded, msg->byteStream, msg->sizeBytes);
@@ -91,7 +123,8 @@ void paddMessage(Message* msg) {
     setBitAt(padded, msg->sizeBits);
 
     // Append `k` zero bits
-    clearNBitsAt(padded, msg->sizeBits+1, k);
+    clearNBitsAt(padded, msg->sizeBits+1, k); // todo mozno by bolo lepsie cely buffer az do konca vynulovat.
+    // todo v pripade extension attacku sa mi tu mozno moze nieco dosrat, aj ked dlzka by mala pri nom mat vzdy viac bitov
 
     // Finally append 64-bit block that is equal to the bit count of original message
     memcpy(padded + totalByteCount - 8, &msgSize64BigEndian, 8);
@@ -105,9 +138,15 @@ void paddMessage(Message* msg) {
 }
 
 std::vector<byte*> parseMessage(Message* msg) {
+    DEBUG("PARSING");
     auto blocksCount = msg->sizeBits / BLOCK_SIZE;
     std::vector<byte*> outputVec;
-    for(int i = 0; i < blocksCount; i++) outputVec.push_back(msg->byteStream + (BLOCK_SIZE * i));
+    for(int i = 0; i < blocksCount; i++) outputVec.push_back(msg->byteStream + (BLOCK_SIZE_BYTES * i));
+
+    for(auto a : outputVec) {
+        DEBUG((uint64_t)a);
+    }
+
     return outputVec;
 }
 

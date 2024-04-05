@@ -52,8 +52,8 @@ ProgramInput parsePrimary(int argc, char ** argv) {
     }
 
     // For optimization purposses, some logic that would ideally be in other parts of the code is put here
-    if(primaryOption == "-s" || primaryOption == "-v") {
-        // For -s and -v option, I want to avoid first loading user input and then prepending key,
+    if(primaryOption == "-s" || primaryOption == "-v" || primaryOption == "-e") { // TODO tato podmineka zrefaktorovat
+        // For -s, -v ane -e option, I want to avoid first loading user input and then prepending key,
         // because then I would have to allocate additional memory for new message, which is not ideal.
         auto input = readInputForS(optArgs["-k"]);
         return ProgramInput(primaryOption, optArgs, input.first, input.second);

@@ -70,15 +70,16 @@ static const uint32 K[64] = {
 /**
  * @brief Padds the message as described in FIPS PUB 180-4.
  * @param msg Message struct.
- */
-void paddMessage(Message* msg);
+ */ //TODO update docstring to reflect added parameter
+void paddMessage(Message* msg, uint64_t attackSize=0);
+void paddMessage2(Message* msg);
 
 /**
  * SHA256 hash calculation as described in FIPS PUB 180-4.
  * @param msg Message to be digested.
  * @param result Output buffer for hash values.
- */ //TODO update docstring to reflect added parameter
-void sha256(Message* msg, const uint32* H0, uint32* result);
+ */
+void sha256(Message* msg, const uint32* H0, uint32* result, uint64_t len=0);
 
 /**
  * Calculates pointers to individual 512bit blocks of the message.

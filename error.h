@@ -35,3 +35,4 @@ void throwError(const std::string& errorMsg, int errorCode);
 
 
 #endif //PROJ2_ERROR_H
+

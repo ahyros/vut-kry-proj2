@@ -146,3 +146,42 @@ void printHash(uint32 *H) {
 // 384f0139
 //
 
+void printFakeMessage(std::string msg, std::string extension) {
+    std::string fakeMsg = msg + "\\x80";
+    size_t msgSizeBits = msg.size()*8;
+    size_t msgSizeBitsEndian = __builtin_bswap64(msgSizeBits);
+    size_t paddedBitCount = closestMultiple(msgSizeBits, BLOCK_SIZE);
+    uint32 k = 448 - (msgSizeBits + 1);
+
+    for(int i = 0; i < k/8; i++) fakeMsg += "\\x00";
+    uint8_t* bytes = reinterpret_cast<uint8_t*>(&msgSizeBitsEndian);
+    std::stringstream ss;
+    ss << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[0]);
+    ss << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[1]);
+    ss << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[2]);
+    ss << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[3]);
+    ss << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[4]);
+    ss << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[5]);
+    ss << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[6]);
+    ss << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[7]);
+    fakeMsg += ss.str();
+    fakeMsg += extension;
+    std::cout << fakeMsg << std::endl;
+}
+
+
+
+
+
+
+void printBytes(uint64_t value) {
+    uint8_t* bytes = reinterpret_cast<uint8_t*>(&value);
+    std::cout << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[0]);
+    std::cout << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[1]);
+    std::cout << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[2]);
+    std::cout << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[3]);
+    std::cout << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[4]);
+    std::cout << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[5]);
+    std::cout << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[6]);
+    std::cout << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[7]) << std::endl;
+}

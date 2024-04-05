@@ -13,13 +13,16 @@
 #include <bitset>
 #include <vector>
 #include <regex>
+#include <iomanip>
+#include <sstream>
 
 #include "error.h"
 
 #define DEBUG(X) std::cout << X << std::endl
-#define HEX_PATTTERN "[0-9A-Fa-f]+"
+#define HEX_PATTTERN "[0-9A-Fa-f]+" // TODO toto lepšie ne?: ^[A-Fa-f0-9]{64}$
 #define WORD_SIZE 32
 #define BLOCK_SIZE 512
+#define BLOCK_SIZE_BYTES 64
 #define HASH_SIZE 8
 
 typedef uint32_t uint32;
@@ -92,5 +95,9 @@ uint32 copyRespectEndianness(byte* src);
  * @param out Output buffer. Must be of size 8.
  */
 void stringHashToInt(std::string strHex, uint32* out);
-
+void printBytes(uint64_t value);
+void printFakeMessage(std::string msg, std::string extension);
 #endif //PROJ2_UTILS_H
+
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
