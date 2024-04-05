@@ -92,6 +92,6 @@ std::pair<byte*, size_t> readInput();
  * @param key Key for calculating MAC.
  * @return Pointer to byte array, where input with prepended key is stored.
  */
-std::pair<byte*, size_t> readInputForS(std::string key);
+std::pair<byte*, size_t> readInputForMAC(std::string key);
 
 #endif //PROJ2_ARGPARSER_H

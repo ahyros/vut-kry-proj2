@@ -21,19 +21,12 @@
 
 int main(int argc, char ** argv) {
     auto programInput = parsePrimary(argc, argv);
-    std::cout << "ALL OK" << std::endl;
-    std::cout << "Selected option: " << programInput.primaryOption << std::endl;
-    std::cout << "Bytestream len: " << programInput.streamSize << std::endl;
-    std::cout << "Bytestream: " << programInput.byteStream << std::endl;
-
 
     // Calculating SHA256 hash for entered message
     if(programInput.primaryOption == "-c") {
-        Message msg = Message(programInput.byteStream, programInput.streamSize, programInput.streamSize * 8);
-        DEBUG("TUT1");
+        Message msg = Message(programInput.byteStream, programInput.streamSize);
         uint32 H[HASH_SIZE];
-        sha256(&msg, HInitial, H); // calculate hash
-        DEBUG("TUT10");
+        sha256(&msg, H); // calculate hash
         // print out hash
         printHash(H);
 
@@ -45,9 +38,9 @@ int main(int argc, char ** argv) {
 
     // Calculating MAC for entered message and key
     if(programInput.primaryOption == "-s") {
-        Message msg = Message(programInput.byteStream, programInput.streamSize, programInput.streamSize * 8);
+        Message msg = Message(programInput.byteStream, programInput.streamSize);
         uint32 MAC[HASH_SIZE];
-        sha256(&msg, HInitial, MAC); // calculate MAC
+        sha256(&msg, MAC); // calculate MAC
 
         // print out result
         printHash(MAC);
@@ -59,10 +52,10 @@ int main(int argc, char ** argv) {
 
     // Validating MAC for entered MAC, message and key
     if(programInput.primaryOption == "-v") {
-        Message msg = Message(programInput.byteStream, programInput.streamSize, programInput.streamSize * 8);
+        Message msg = Message(programInput.byteStream, programInput.streamSize);
         uint32 MAC[HASH_SIZE]; // calculated MAC
         uint32 msgMAC[HASH_SIZE]; // MAC received from command line
-        sha256(&msg, HInitial, MAC);
+        sha256(&msg, MAC);
         stringHashToInt(programInput.secondaryOptions["-m"], msgMAC);
         free(msg.byteStream);
 
@@ -70,25 +63,31 @@ int main(int argc, char ** argv) {
         for(int i = 0; i < HASH_SIZE; i++) {
             ok = ok && (MAC[i] == msgMAC[i]);
         }
-        if(ok) { DEBUG("OK"); return 0;} // TODO remove OK debug
-        else {DEBUG("NOT OK"); return 1;}
+        return !ok;
     }
 
 
     // Performing lenght extension attack
     if(programInput.primaryOption == "-e") {
-        Message msg = Message(programInput.byteStream, programInput.streamSize, programInput.streamSize * 8);
         uint32 msgMAC[HASH_SIZE];
         uint32 newMAC[HASH_SIZE];
         size_t extensionSize = programInput.secondaryOptions["-a"].size();
+        size_t keyLen = std::stol(programInput.secondaryOptions["-n"]);
         stringHashToInt(programInput.secondaryOptions["-m"], msgMAC);
-        sha256(&msg, msgMAC, newMAC, msg.sizeBits + extensionSize*8); // todo sprava musi byt z secondary argumentu, updatnut aj velkost spravy
+        AttackInfo attack = AttackInfo(extensionSize, msgMAC);
+
+        auto byteStream = (byte*)malloc( extensionSize * sizeof(byte));
+        if(byteStream == nullptr) throwError("[ERROR] Memory allocation failed...", ERR_MEM_ALLOCATION_FAILED);
+        memcpy(byteStream, (byte*)programInput.secondaryOptions["-a"].c_str(), extensionSize); // copy it to heap
+
+        Message msg = Message(byteStream, extensionSize);
+
+        sha256(&msg, newMAC, &attack);
 
         printHash(newMAC);
-        // TODO tento print
-        printFakeMessage(std::string(reinterpret_cast<char*>(programInput.byteStream)), programInput.secondaryOptions["-a"]);
+        printFakeMessage(std::string(reinterpret_cast<char*>(programInput.byteStream)),
+                         programInput.secondaryOptions["-a"],
+                         keyLen);
     }
 }
 
-
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

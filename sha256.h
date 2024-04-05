@@ -29,16 +29,31 @@ struct Message {
      * @param sizeBits Size of buffer in bits
      */
     Message(byte* byteStream,
-            size_t sizeBytes,
-            size_t sizeBits) {
+            size_t sizeBytes) {
         this->byteStream = byteStream;
         this->sizeBytes = sizeBytes;
-        this->sizeBits = sizeBits;
+        this->sizeBits = sizeBytes * 8;
+    }
+};
+
+/**
+ * @brief This structure stores information needed to perform length extension attack.
+ * Parameters from this structure override various "default" values in sha256 algorithm
+ */
+struct AttackInfo {
+    size_t originalMsgSize; // size of original (intercepted) message
+    uint32* HAttack; // hash of the original message
+
+    AttackInfo(size_t originalMsgSize, uint32* HAttack) {
+        this->originalMsgSize = originalMsgSize;
+        this->HAttack = HAttack;
     }
 };
 
 
-
+/**
+ * @brief Initial hash value for sha256 as specified in FIPS PUB 180-4 specification.
+ */
 static const uint32 HInitial[HASH_SIZE] = {
 0x6a09e667,
 0xbb67ae85,
@@ -70,16 +85,17 @@ static const uint32 K[64] = {
 /**
  * @brief Padds the message as described in FIPS PUB 180-4.
  * @param msg Message struct.
- */ //TODO update docstring to reflect added parameter
+ * @param attackSize This parameter is used in length extension attack scenario and specifies "fake" message length
+ * to be appended to the very end of the padded message.
+ */
 void paddMessage(Message* msg, uint64_t attackSize=0);
-void paddMessage2(Message* msg);
 
 /**
  * SHA256 hash calculation as described in FIPS PUB 180-4.
  * @param msg Message to be digested.
  * @param result Output buffer for hash values.
  */
-void sha256(Message* msg, const uint32* H0, uint32* result, uint64_t len=0);
+void sha256(Message* msg, uint32* result, AttackInfo* attack=nullptr);
 
 /**
  * Calculates pointers to individual 512bit blocks of the message.

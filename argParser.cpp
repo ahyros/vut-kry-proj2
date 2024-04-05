@@ -10,10 +10,11 @@
 void displayUsage() {
     std::cout << "Usage: proj2 [options]" << std::endl;
     std::cout << "Options:" << std::endl;
+    std::cout << "  -h                                      Displays this message" << std::endl;
     std::cout << "  -c                                      Calculates checksum for message from STDIN" << std::endl;
     std::cout << "  -s [-k KEY]                             Calculates MAC for message from STDIN" << std::endl;
     std::cout << "  -v [-k KEY] [-m CHS]                    Checks if entered MAC matches to entered message and key" << std::endl;
-    std::cout << "  -e [-k KEY] [-m CHS] [-n NUM] [-a MSG]  Does whatever... TODO" << std::endl;
+    std::cout << "  -e [-m CHS] [-n NUM] [-a MSG]           Performs length extension attack for message from STDIN, with specified MAC and secret key length" << std::endl;
     exit(0); // program ends with this message
 }
 
@@ -28,8 +29,8 @@ void displayUsage() {
  * found, program ends with error.
  */
 ProgramInput parsePrimary(int argc, char ** argv) {
-    std::string primaryOption(argv[1]);
     if(argc == 1) displayUsage(); // Invalid number of args... show usage
+    std::string primaryOption(argv[1]);
     if(primaryOption == "-h") displayUsage(); // For -h option show usage
 
     // Throw error if no valid primary option is found
@@ -52,10 +53,10 @@ ProgramInput parsePrimary(int argc, char ** argv) {
     }
 
     // For optimization purposses, some logic that would ideally be in other parts of the code is put here
-    if(primaryOption == "-s" || primaryOption == "-v" || primaryOption == "-e") { // TODO tato podmineka zrefaktorovat
+    if(primaryOption == "-s" || primaryOption == "-v" || primaryOption == "-e") {
         // For -s, -v ane -e option, I want to avoid first loading user input and then prepending key,
         // because then I would have to allocate additional memory for new message, which is not ideal.
-        auto input = readInputForS(optArgs["-k"]);
+        auto input = readInputForMAC(optArgs["-k"]);
         return ProgramInput(primaryOption, optArgs, input.first, input.second);
     }
 
@@ -94,7 +95,7 @@ std::pair<byte*, size_t> readInput() {
 }
 
 
-std::pair<byte*, size_t> readInputForS(std::string key) {
+std::pair<byte*, size_t> readInputForMAC(std::string key) {
     std::string userInput;
     std::getline(std::cin, userInput); // read user input until `\n` is encountered
 

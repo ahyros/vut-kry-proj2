@@ -31,51 +31,6 @@ void clearBitAt(byte *buffer, size_t bitIndex) {
 }
 
 
-void setNBitsAt(byte *buffer, size_t bitIndex, size_t N) {
-    auto byteIndex = bitIndex / 8;
-    // index of the first bit of closest whole byte
-    auto closestByteBitIndex = closestMultiple(bitIndex, 8);
-    // index of closes byte
-    auto closesByteIndex = closestByteBitIndex / 8;
-    // number of bits before whole bytes
-    auto headBitsSize = closestByteBitIndex - bitIndex;
-    // number of bits after whole bytes
-    auto tailBitsSize = (N - headBitsSize) % 8;
-    // number of whole bytes to be set
-    auto wholeBytesCount = (N - headBitsSize - tailBitsSize) / 8;
-    // setting whole bytes
-    for(int i = closesByteIndex; i < closesByteIndex + wholeBytesCount; i++) {
-        buffer[i] = UCHAR_MAX;
-    }
-    // setting head
-    for(int i = bitIndex; i < bitIndex + headBitsSize; i++) setBitAt(buffer, i);
-    // setting tail
-    for(int i = bitIndex + N; i >  bitIndex + N - tailBitsSize; i--) setBitAt(buffer, i);
-}
-
-void clearNBitsAt(byte *buffer, size_t bitIndex, size_t N) {
-    auto byteIndex = bitIndex / 8;
-    // index of the first bit of closest whole byte
-    auto closestByteBitIndex = closestMultiple(bitIndex, 8);
-    // index of closes byte
-    auto closesByteIndex = closestByteBitIndex / 8;
-    // number of bits before whole bytes
-    auto headBitsSize = closestByteBitIndex - bitIndex;
-    // number of bits after whole bytes
-    auto tailBitsSize = (N - headBitsSize) % 8;
-    // number of whole bytes to be set
-    auto wholeBytesCount = (N - headBitsSize - tailBitsSize) / 8;
-    // setting whole bytes
-    for(int i = closesByteIndex; i < closesByteIndex + wholeBytesCount; i++) {
-        buffer[i] = 0;
-    }
-    // setting head
-    for(int i = bitIndex; i < bitIndex + headBitsSize; i++) clearBitAt(buffer, i);
-    // setting tail
-    for(int i = bitIndex + N; i >  bitIndex + N - tailBitsSize; i--) clearBitAt(buffer, i);
-}
-
-
 void printByteStreamBinary(byte *buffer, size_t size) {
     std::bitset<8> bits;
     int j = 1;
@@ -115,17 +70,12 @@ void stringHashToInt(std::string strHex, uint32* out) {
     if (!std::regex_match(strHex, std::regex(HEX_PATTTERN))) {
         throwError("[ERROR] Entered MAC/HASH must consist of 64 hexadecimal characters...", ERR_INVALID_HASH_ENTERED);
     }
+    // There will be one iteration for each 32bit hash value
     for(int i = 0; i < 8; i++) {
-        //std::cout << "" << << std::endl;
+        // extract indexed hash value, convert it to integer and store it to the output buffer
         auto hexInt32 = strHex.substr(8*i, 8);
-        //DEBUG(hexInt32.size());
         uint32 number = std::stol(hexInt32, nullptr, 16);
         out[i] = number;
-//        std::cout << "Iteration: " << i << std::endl;
-//        std::cout << "Substring: " << hexInt32 << std::endl;
-//        std::cout << "Converted: " << number << std::endl;
-        //std::cout << "" << << std::endl;
-        //std::cout << number << " ";
     }
 }
 
@@ -135,27 +85,18 @@ void printHash(uint32 *H) {
     }
     std::cout << "\n";
 }
-//
-// 4
-// d428a3a0
-// fb29153e
-// 464c56af
-// 9751b802
-// 75fa9c64
-// 1b9b1d82
-// 384f0139
-//
 
-void printFakeMessage(std::string msg, std::string extension) {
-    std::string fakeMsg = msg + "\\x80";
-    size_t msgSizeBits = msg.size()*8;
-    size_t msgSizeBitsEndian = __builtin_bswap64(msgSizeBits);
+void printFakeMessage(std::string msg, std::string extension, size_t keyLen) {
+    std::string fakeMsg = msg + "\\x80"; // append fist `1` bit to the message
+    size_t msgSizeBits = (msg.size() + keyLen) * 8;
+    size_t msgSizeBitsEndian = __builtin_bswap64(msgSizeBits); // calculate message size in big endian
     size_t paddedBitCount = closestMultiple(msgSizeBits, BLOCK_SIZE);
     uint32 k = 448 - (msgSizeBits + 1);
 
-    for(int i = 0; i < k/8; i++) fakeMsg += "\\x00";
+    for(int i = 0; i < k/8; i++) fakeMsg += "\\x00"; // append empty bytes
     uint8_t* bytes = reinterpret_cast<uint8_t*>(&msgSizeBitsEndian);
     std::stringstream ss;
+    // append last 8 bytes (size of message)
     ss << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[0]);
     ss << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[1]);
     ss << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[2]);
@@ -165,23 +106,6 @@ void printFakeMessage(std::string msg, std::string extension) {
     ss << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[6]);
     ss << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[7]);
     fakeMsg += ss.str();
-    fakeMsg += extension;
-    std::cout << fakeMsg << std::endl;
-}
-
-
-
-
-
-
-void printBytes(uint64_t value) {
-    uint8_t* bytes = reinterpret_cast<uint8_t*>(&value);
-    std::cout << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[0]);
-    std::cout << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[1]);
-    std::cout << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[2]);
-    std::cout << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[3]);
-    std::cout << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[4]);
-    std::cout << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[5]);
-    std::cout << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[6]);
-    std::cout << "\\x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[7]) << std::endl;
+    fakeMsg += extension; // finally append the new content which extends the original message
+    std::cout << fakeMsg << std::endl; // print whole message on STDOUT
 }

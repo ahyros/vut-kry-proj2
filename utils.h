@@ -19,7 +19,7 @@
 #include "error.h"
 
 #define DEBUG(X) std::cout << X << std::endl
-#define HEX_PATTTERN "[0-9A-Fa-f]+" // TODO toto lepšie ne?: ^[A-Fa-f0-9]{64}$
+#define HEX_PATTTERN "^[A-Fa-f0-9]{64}$"
 #define WORD_SIZE 32
 #define BLOCK_SIZE 512
 #define BLOCK_SIZE_BYTES 64
@@ -52,22 +52,6 @@ void setBitAt(byte *buffer, size_t bitIndex);
 void clearBitAt(byte *buffer, size_t bitIndex);
 
 /**
- * @brief Sets block of N bits to `1` in byte buffer.
- * @param buffer Byte buffer
- * @param bitIndex Specifies the first bit to be set.
- * @param N Specifies, how many bits will be set.
- */
-void setNBitsAt(byte *buffer, size_t bitIndex, size_t N);
-
-/**
- * @brief Sets block of N bits to `0` in byte buffer.
- * @param buffer Byte buffer
- * @param bitIndex Specifies the first bit to be set.
- * @param N Specifies, how many bits will be set.
- */
-void clearNBitsAt(byte *buffer, size_t bitIndex, size_t N);
-
-/**
  * @brief Prints byte stream to STDOUT in binary form. Used only for debugging.
  * @param buffer Byte buffer.
  * @param size Size of the buffer.
@@ -95,9 +79,12 @@ uint32 copyRespectEndianness(byte* src);
  * @param out Output buffer. Must be of size 8.
  */
 void stringHashToInt(std::string strHex, uint32* out);
-void printBytes(uint64_t value);
-void printFakeMessage(std::string msg, std::string extension);
+
+/**
+ * Prints "fake" message to the STDOUT in length extension attack scenario.
+ * @param msg Original message that is beiing attacked
+ * @param extension Extension of the original message (by attacker)
+ * @param keyLen Length of the secred key
+ */
+void printFakeMessage(std::string msg, std::string extension, size_t keyLen);
 #endif //PROJ2_UTILS_H
-
-
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
