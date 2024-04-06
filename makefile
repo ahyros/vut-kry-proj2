@@ -13,7 +13,7 @@ TARGET = kry
 # Targets
 .PHONY: all clean
 
-all: $(TARGET)
+all: $(TARGET) clean_objs
 
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET)
@@ -21,7 +21,10 @@ $(TARGET): $(OBJS)
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
 
+clean_objs:
+	rm $(OBJS) $(DEPS)
+
 clean:
-	$(RM) $(OBJS) $(DEPS) $(TARGET)
+	rm $(OBJS) $(DEPS) $(TARGET)
 
 -include $(DEPS)
