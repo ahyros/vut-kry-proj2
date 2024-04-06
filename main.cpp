@@ -74,16 +74,21 @@ int main(int argc, char ** argv) {
         size_t extensionSize = programInput.secondaryOptions["-a"].size();
         size_t keyLen = std::stol(programInput.secondaryOptions["-n"]);
         stringHashToInt(programInput.secondaryOptions["-m"], msgMAC);
-        AttackInfo attack = AttackInfo(extensionSize, msgMAC);
 
+        // safe data needed to perform the attack in specified structure for convenience
+        AttackInfo attack = AttackInfo(programInput.streamSize, extensionSize, msgMAC);
+
+        // put message buffer on the heap
         auto byteStream = (byte*)malloc( extensionSize * sizeof(byte));
         if(byteStream == nullptr) throwError("[ERROR] Memory allocation failed...", ERR_MEM_ALLOCATION_FAILED);
-        memcpy(byteStream, (byte*)programInput.secondaryOptions["-a"].c_str(), extensionSize); // copy it to heap
+        memcpy(byteStream, (byte*)programInput.secondaryOptions["-a"].c_str(), extensionSize);
 
         Message msg = Message(byteStream, extensionSize);
 
+        // hash the extension string with `newMAC` initial hash values.
         sha256(&msg, newMAC, &attack);
 
+        // print results
         printHash(newMAC);
         printFakeMessage(std::string(reinterpret_cast<char*>(programInput.byteStream)),
                          programInput.secondaryOptions["-a"],

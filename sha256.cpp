@@ -9,7 +9,7 @@
 
 void sha256(Message* msg, uint32* result, AttackInfo* attack) {
     // preprocessing
-    if(attack) paddMessage(msg, attack->originalMsgSize*8 + 512); // todo 512 * pocet blokov povodnej spravy
+    if(attack) paddMessage(msg, attack->extensionSizeBytes*8 + closestMultiple(attack->originalMsgSizeBytes, 512));
     else paddMessage(msg);
 
     auto blocks = parseMessage(msg);

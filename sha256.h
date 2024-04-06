@@ -41,11 +41,13 @@ struct Message {
  * Parameters from this structure override various "default" values in sha256 algorithm
  */
 struct AttackInfo {
-    size_t originalMsgSize; // size of original (intercepted) message
+    size_t originalMsgSizeBytes; // size of original (intercepted) message
+    size_t extensionSizeBytes;
     uint32* HAttack; // hash of the original message
 
-    AttackInfo(size_t originalMsgSize, uint32* HAttack) {
-        this->originalMsgSize = originalMsgSize;
+    AttackInfo(size_t originalMsgSize, size_t extensionSizeBytes, uint32* HAttack) {
+        this->originalMsgSizeBytes = originalMsgSize;
+        this->extensionSizeBytes = extensionSizeBytes;
         this->HAttack = HAttack;
     }
 };
