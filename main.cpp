@@ -63,6 +63,7 @@ int main(int argc, char ** argv) {
         for(int i = 0; i < HASH_SIZE; i++) {
             ok = ok && (MAC[i] == msgMAC[i]);
         }
+
         return !ok;
     }
 
@@ -93,6 +94,9 @@ int main(int argc, char ** argv) {
         printFakeMessage(std::string(reinterpret_cast<char*>(programInput.byteStream)),
                          programInput.secondaryOptions["-a"],
                          keyLen);
+
+        free(msg.byteStream);
+        free(programInput.byteStream);
     }
 }
 
